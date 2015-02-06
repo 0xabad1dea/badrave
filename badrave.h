@@ -42,11 +42,19 @@ typedef size_t		sizet;
 /* mml macros (the numbers are the order I invented them in) */
 #define volume1 "@v1 = { 15 15 14 14 13 13 12 12 11 11 10 10 9 9 8 8 7 7 6 6 }"
 
+/* scales */
+#define third 2
+#define fifth 3
+#define seventh 4
+static char *aminor[8] = {"a", "b", "c", "d", "e", "f", "g", "a"};
+static char *fminor[8] = {"f", "g", "a-","b-","c", "d-","e-","f"};
+
 /* functions */
 
 byte* genMeasureRhythm(void);
 byte getOneBeat(void);
 void printMMLHeader(dword);
+char* naiveNotePicker(char, char**, byte*);
 
 
 /* debug functions */
