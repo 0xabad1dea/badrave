@@ -31,15 +31,42 @@ signed main(signed argc, char *argv[]) {
 	
 	printMMLHeader(seed);
 	
-	byte* testMeasure = genMeasureRhythm();
+	byte* testMeasureAH = genMeasureRhythm(); // harmonious
+	byte* testMeasureAN = genMeasureRhythm(); // naive
+	byte* testMeasureB = genMeasureRhythm();
+	//byte* testMeasureC = genMeasureRhythm();
 	
 	// tmp: give the channels some parameters
-	printf("\nA o3 @1 @v1\nB o2 @2 @v1\n");
+	printf("\nA %s %s %s\n", randomOctave(), randomTimbre(), randomVolume());
+	printf("B %s %s %s\n", randomOctave(), randomTimbre(), randomVolume());
+	printf("C %s q6\n", randomOctave());
 	
-	char* testOutputA = naiveNotePicker('A', aminor, testMeasure);
-	char* testOutputB = naiveNotePicker('B', aminor, testMeasure);
-	printf("%s\n%s\n%s\n%s\n", testOutputA, testOutputA, testOutputA, testOutputA);
+	//char* testOutputAN = naiveNotePicker('A', fminor, testMeasureAN);
+	char* testOutputAH = harmonyNotePicker('A', fminor, testMeasureAH);
+	char* testOutputB = harmonyNotePicker('B', fminor, testMeasureB);
+	char* testOutputC = harmonyNotePicker('C', fminor, testMeasureB);
+	printf("%s\n%s\n%s\n%s\n", testOutputAH, testOutputAH, testOutputAH, testOutputAH);
 	printf("%s\n%s\n%s\n%s\n", testOutputB, testOutputB, testOutputB, testOutputB);
+	printf("%s\n%s\n%s\n%s\n", testOutputC, testOutputC, testOutputC, testOutputC);
+	
+	char* testOutputAN2 = naiveNotePicker('A', fminor, testMeasureAN);
+	char* testOutputAH2 = harmonyNotePicker('A', fminor, testMeasureAH);
+	//char* testOutputB2 = naiveNotePicker('B', fminor, testMeasureB);
+	
+	printf("%s\n%s\n%s\n%s\n", testOutputAH2, testOutputAH2, testOutputAN2, testOutputAH2);
+	printf("%s\n%s\n%s\n%s\n", testOutputB, testOutputB, testOutputB, testOutputB);
+	printf("%s\n%s\n%s\n%s\n", testOutputC, testOutputC, testOutputC, testOutputC);
+	
+	printf("\nA %s %s %s\n", randomOctave(), randomTimbre(), randomVolume());
+	printf("B %s\n", randomOctave());
+	
+	printf("%s\n%s\n%s\n%s\n", testOutputAH, testOutputAH, testOutputAH, testOutputAH);
+	printf("%s\n%s\n%s\n%s\n", testOutputB, testOutputB, testOutputB, testOutputB);
+	printf("%s\n%s\n%s\n%s\n", testOutputC, testOutputC, testOutputC, testOutputC);
+	
+	printf("%s\n%s\n%s\n%s\n", testOutputAH2, testOutputAH2, testOutputAN2, testOutputAH2);
+	printf("%s\n%s\n%s\n%s\n", testOutputB, testOutputB, testOutputB, testOutputB);
+	printf("%s\n%s\n%s\n%s\n", testOutputC, testOutputC, testOutputC, testOutputC);
 	
 	
 	return 0; }
@@ -132,7 +159,10 @@ void printMMLHeader(dword seed) {
 	printf("; by %s with seed 0x%X\n\n", badversion, seed);
 	
 	// the library of mml macros we use
-	printf("%s\n", volume1);
+	printf("%s\n%s\n%s\n%s\n", volume1, volume9, volume15, volume16);
+	printf("%s\n%s\n%s\n%s\n", volume21, volume23, volume26, volume27);
+	
+	printf("%s\n%s\n%s\n%s\n", atat4, atat7, atat10, atat21);
 	// todo: more lol
 	
 	// tempo
@@ -140,23 +170,57 @@ void printMMLHeader(dword seed) {
 	
 	return; }
 
-/* assigns notes arbitrarily from key to measure. */
-char* naiveNotePicker(char channel, char** key, byte* measure) {
+/* assigns notes only from 1st, 3rd, 5th, 7th for a harmonious sound */
+char* harmonyNotePicker(char channel, char** key, byte* measure) {
 	char* output = malloc(150);
 	if(!output) exit(-1);
-	
+
 	byte notes[17];
-	
+
 	byte count; 
 	for(count = 0; count < 17; count++) {
 		if(measure[count] == 0) { break; } }
+
+	dword rando;
+	for(byte i = 0; i < count; i++) {
+		rando = (dword)rand();
+		if((rando & 0x3) == 0) { notes[i] = 0; continue; }
+		if((rando & 0x3) == 1) { notes[i] = 2; continue; }
+		if((rando & 0x3) == 2) { notes[i] = 3; continue; }
+		if((rando & 0x3) == 3) { notes[i] = 4; continue; }
+		// think that's everything but
+		notes[i] = 7; }
 		
-	dword rando = (dword)rand();
-	// start and end on the base note of the key, either low or high.
-	if(rando & 0x1) { notes[0] = 0; notes[count] = 0; }
-	else { notes[0] = 7; notes[count] = 7; }
-	
-	for(byte i = 1; i < count-1; i++) {
+		rando = (dword)rand();
+		// start and end on the base note of the key, either low or high.
+		if(rando & 0x1) { notes[0] = 0; notes[count-1] = 0; }
+		else { notes[0] = 7; notes[count-1] = 7; }
+
+	// print channel
+	snprintf(output, 8, "%c ", channel);
+	char tmp[8];
+	for(byte i = 0; i < count; i++) {
+		if(notes[i] == 7) { snprintf(tmp, 7, ">%s%u< ", key[notes[i]], measure[i]); }
+		else { snprintf(tmp, 7, "%s%u ", key[notes[i]], measure[i]); }
+		// 16 notes * 8 characters == 128. buffer is 150.
+		strlcat(output, tmp, 149); }
+
+	return output; }
+
+
+/* assigns notes arbitrarily */
+char* naiveNotePicker(char channel, char** key, byte* measure) {
+	char* output = malloc(150);
+	if(!output) exit(-1);
+
+	byte notes[17];
+
+	byte count; 
+	for(count = 0; count < 17; count++) {
+		if(measure[count] == 0) { break; } }
+
+	dword rando;
+	for(byte i = 0; i < count; i++) {
 		rando = (dword)rand();
 		if((rando & 0x7) == 1) { notes[i] = 0; continue; }
 		if((rando & 0x7) == 2) { notes[i] = 1; continue; }
@@ -165,16 +229,54 @@ char* naiveNotePicker(char channel, char** key, byte* measure) {
 		if((rando & 0x7) == 5) { notes[i] = 4; continue; }
 		if((rando & 0x7) == 6) { notes[i] = 5; continue; }
 		if((rando & 0x7) == 7) { notes[i] = 6; continue; }
-		// think that's everything but
 		notes[i] = 7; }
 		
+		rando = (dword)rand();
+		// start and end on the base note of the key, either low or high.
+		if(rando & 0x1) { notes[0] = 0; notes[count-1] = 0; }
+		else { notes[0] = 7; notes[count-1] = 7; } 
+
 	// print channel
 	snprintf(output, 8, "%c ", channel);
 	char tmp[8];
 	for(byte i = 0; i < count; i++) {
-		snprintf(tmp, 7, "%s%u ", key[notes[i]], measure[i]);
+		if(notes[i] == 7) { snprintf(tmp, 7, ">%s%u< ", key[notes[i]], measure[i]); }
+		else { snprintf(tmp, 7, "%s%u ", key[notes[i]], measure[i]); }
 		// 16 notes * 8 characters == 128. buffer is 150.
 		strlcat(output, tmp, 149); }
-		
-	
+
 	return output; }
+
+// one of o2 .. o5
+char* randomOctave() {
+	dword rando = (dword)rand();
+	if((rando & 0x3) == 0) { return o2; }
+	if((rando & 0x3) == 1) { return o3; }
+	if((rando & 0x3) == 2) { return o4; }
+	if((rando & 0x3) == 3) { return o5; }
+	return o3; }
+	
+// return a volume parameter
+char* randomVolume() {
+	dword rando = (dword)rand();
+	if((rando & 0x7) == 0) { return "@v1"; }
+	if((rando & 0x7) == 1) { return "@v9"; }
+	if((rando & 0x7) == 2) { return "@v15"; }
+	if((rando & 0x7) == 3) { return "@v16"; }
+	if((rando & 0x7) == 4) { return "@v21"; }
+	if((rando & 0x7) == 5) { return "@v23"; }
+	if((rando & 0x7) == 6) { return "@v26"; }
+	if((rando & 0x7) == 7) { return "@v27"; }
+	return volume1; }
+	
+char* randomTimbre() {
+	dword rando = (dword)rand();
+	if((rando & 0x7) == 0) { return at0; }
+	if((rando & 0x7) == 1) { return at1; }
+	if((rando & 0x7) == 2) { return at2; }
+	if((rando & 0x7) == 3) { return at3; }
+	if((rando & 0x7) == 4) { return at4; }
+	if((rando & 0x7) == 5) { return at7; }
+	if((rando & 0x7) == 6) { return at10; }
+	if((rando & 0x7) == 7) { return at21; }
+	return at2; }
