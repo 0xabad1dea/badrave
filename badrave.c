@@ -4,7 +4,6 @@
 	0 x A B A D 1 D E A
 	
 	badrave by @0xabad1dea (Melissa Elliott) Feb 2015
-	this version not open source licensed
 	
 	generates procedural music in MML format to feed
 	into pp-mck and thereby generate chiptunes.
