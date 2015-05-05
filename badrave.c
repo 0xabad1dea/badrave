@@ -9,7 +9,7 @@
 	into pp-mck and thereby generate chiptunes.
 	
 	clang -Weverything -Wno-unused-macros -o badrave badrave.c
-
+	gcc -std=c99 -Wall -Wno-unused-macros -Wno-unused-variable -o badrave strlcat.c badrave.c
 */
 
 #include <stdio.h>
