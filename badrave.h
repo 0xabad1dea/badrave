@@ -2,7 +2,12 @@
 	badrave by @0xabadidea Feb 2015
 */
 
-#include <stdint.h>	
+#include <stdint.h>
+
+#ifdef __linux__
+size_t strlcat (char *__dst, __const char *__src, size_t __n)
+     __THROW __nonnull ((1, 2));
+#endif
 
 /* abadidea's safety ban collection. clang -Wno-unused-macros */
 
